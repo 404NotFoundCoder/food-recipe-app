@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { doc, getDoc, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, deleteDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
-import { Recipe } from "@/app/types/recipe";
+import { Recipe, Comment } from "@/app/types/recipe";
 
 import { useAuth } from "@/app/contexts/AuthContext";
 import Link from "next/link";
@@ -21,6 +21,13 @@ import {
   faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-hot-toast";
+import CommentSection from "@/app/components/CommentSection";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  getDocs,
+} from "firebase/firestore";
 
 export default function RecipeDetailPage() {
   const { id } = useParams();
@@ -35,21 +42,37 @@ export default function RecipeDetailPage() {
   );
   const [showTodoList, setShowTodoList] = useState(false);
 
-  useEffect(() => {
-    const fetchRecipe = async () => {
-      try {
-        const docRef = doc(db, "recipes", id as string);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setRecipe({ id: docSnap.id, ...docSnap.data() } as Recipe);
-        }
-      } catch (error) {
-        console.error("Error fetching recipe:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchRecipe = async () => {
+    try {
+      const docRef = doc(db, "recipes", id as string);
+      const docSnap = await getDoc(docRef);
 
+      if (docSnap.exists()) {
+        // 獲取食譜資料
+        const recipeData = { id: docSnap.id, ...docSnap.data() } as Recipe;
+
+        // 獲取評論
+        const commentsRef = collection(db, "recipes", id as string, "comments");
+        const commentsSnap = await getDocs(commentsRef);
+        const commentsData = commentsSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as unknown as Comment[];
+
+        // 合併資料
+        setRecipe({
+          ...recipeData,
+          comments: commentsData,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching recipe:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchRecipe();
   }, [id]);
 
@@ -78,6 +101,72 @@ export default function RecipeDetailPage() {
       newChecked.add(index);
     }
     setCheckedIngredients(newChecked);
+  };
+
+  const handleAddComment = async (
+    rating: number | undefined,
+    content: string,
+    parentId?: string | null
+  ) => {
+    if (!user || !recipe) return;
+
+    try {
+      const commentData = {
+        userId: user.uid,
+        userName: user.displayName || "匿名用戶",
+        content,
+        createdAt: serverTimestamp(),
+        ...(rating !== undefined && { rating }),
+        ...(parentId && { parentId }),
+      };
+
+      // 添加評論到 Firebase
+      const docRef = await addDoc(
+        collection(db, "recipes", recipe.id, "comments"),
+        commentData
+      );
+
+      // 更新本地狀態，使用 Timestamp 對象
+      const newComment = {
+        ...commentData,
+        id: docRef.id,
+        createdAt: {
+          toDate: () => new Date(), // 模擬 Firestore Timestamp 的 toDate 方法
+        },
+      };
+
+      if (!parentId && rating !== undefined) {
+        const newTotalRatings = (recipe.totalRatings || 0) + 1;
+        const newAverageRating =
+          ((recipe.averageRating || 0) * (recipe.totalRatings || 0) + rating) /
+          newTotalRatings;
+
+        await updateDoc(doc(db, "recipes", recipe.id), {
+          averageRating: newAverageRating,
+          totalRatings: newTotalRatings,
+        });
+
+        // 更新本地食譜狀態
+        setRecipe({
+          ...recipe,
+          averageRating: newAverageRating,
+          totalRatings: newTotalRatings,
+          comments: [...(recipe.comments || []), newComment],
+        });
+      } else {
+        // 更新本地狀態
+        setRecipe((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            comments: [...(prev.comments || []), newComment],
+          };
+        });
+      }
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      toast.error("評論發布失敗，請稍後再試");
+    }
   };
 
   if (loading) {
@@ -301,6 +390,18 @@ export default function RecipeDetailPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* 評論區域 */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-semibold mb-6">食譜評價</h2>
+        <CommentSection
+          recipeId={recipe.id}
+          comments={recipe.comments || []}
+          averageRating={recipe.averageRating || 0}
+          totalRatings={recipe.totalRatings || 0}
+          onAddCommentAction={handleAddComment}
+        />
       </div>
 
       {/* 刪除確認彈窗 */}

@@ -9,6 +9,17 @@ export interface Step {
   content: string;
 }
 
+export interface Comment {
+  id: string;
+  userId: string;
+  userName: string;
+  rating?: number;
+  content: string;
+  createdAt: any;
+  parentId?: string;
+  replies?: Comment[];
+}
+
 export interface Recipe {
   id: string;
   title: string;
@@ -19,4 +30,7 @@ export interface Recipe {
   authorName: string;
   createdAt: any;
   updatedAt?: any;
+  averageRating?: number;
+  totalRatings?: number;
+  comments?: Comment[];
 }
