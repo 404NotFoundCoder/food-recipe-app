@@ -1,8 +1,14 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "./contexts/AuthContext";
+import Logo from "./components/Logo";
+import UserMenu from "./components/UserMenu";
 
 export default function Home() {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
       {/* 導航欄 */}
@@ -10,25 +16,20 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center space-x-4">
-              <Image
-                src="/next.svg"
-                alt="美食分享"
-                width={40}
-                height={40}
-                className="w-auto h-8"
-              />
-              <span className="text-xl font-bold font-display bg-gradient-to-r from-orange-600 to-pink-600 text-transparent bg-clip-text">
-                美食分享
-              </span>
+              <Logo />
             </div>
 
             <div className="flex items-center space-x-4">
-              <Link
-                href="/login"
-                className="text-gray-600 hover:text-orange-600 transition-colors"
-              >
-                登入
-              </Link>
+              {user ? (
+                <UserMenu />
+              ) : (
+                <Link
+                  href="/login"
+                  className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-6 py-2 rounded-full hover:from-orange-600 hover:to-pink-600 transition-colors"
+                >
+                  登入
+                </Link>
+              )}
               <Link
                 href="/register"
                 className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white px-6 py-2 rounded-full transition-all transform hover:scale-105 shadow-md"

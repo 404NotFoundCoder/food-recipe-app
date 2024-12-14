@@ -1,13 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  updateProfile,
+  signOut,
+} from "firebase/auth";
 import { auth } from "@/app/lib/firebase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import GoogleSignInButton from "@/app/components/GoogleSignInButton";
 import Logo from "@/app/components/Logo";
+import { toast } from "react-hot-toast";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -15,6 +21,12 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSubmit(e);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,9 +37,28 @@ export default function Register() {
         password
       );
       await updateProfile(user, { displayName: name });
-      router.push("/");
+      await sendEmailVerification(user, {
+        url: window.location.origin + "/login",
+        handleCodeInApp: false,
+      });
+      toast.success("註冊成功！請查看您的電子郵件以完成驗證。", {
+        duration: 5000,
+        style: {
+          background: "#D1FAE5",
+          color: "#065F46",
+          border: "1px solid #34D399",
+        },
+      });
+      await signOut(auth);
+      router.push("/login");
     } catch (error: any) {
-      setError("註冊失敗：" + error.message);
+      toast.error("註冊失敗：" + error.message, {
+        style: {
+          background: "#FEE2E2",
+          color: "#991B1B",
+          border: "1px solid #F87171",
+        },
+      });
     }
   };
 
@@ -122,6 +153,7 @@ export default function Register() {
                 placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onKeyPress={handleKeyPress}
               />
             </div>
 

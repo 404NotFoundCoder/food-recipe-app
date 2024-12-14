@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_TC, Playfair_Display, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./contexts/AuthContext";
+import { Toaster } from "react-hot-toast";
 
 // 主要文字字體
 const notoSansTC = Noto_Sans_TC({
@@ -39,6 +40,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <AuthProvider>{children}</AuthProvider>
+        <Toaster position="top-center" />
       </body>
     </html>
   );

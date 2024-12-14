@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "@/app/lib/firebase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import GoogleSignInButton from "@/app/components/GoogleSignInButton";
 import Logo from "@/app/components/Logo";
+import { toast } from "react-hot-toast";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,13 +16,47 @@ export default function Login() {
   const [error, setError] = useState("");
   const router = useRouter();
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSubmit(e);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      if (!userCredential.user.emailVerified) {
+        toast.error("請先驗證您的電子郵件後再登入", {
+          style: {
+            background: "#FEE2E2",
+            color: "#991B1B",
+            border: "1px solid #F87171",
+          },
+        });
+        await signOut(auth);
+        return;
+      }
+      toast.success("登入成功！", {
+        style: {
+          background: "#D1FAE5",
+          color: "#065F46",
+          border: "1px solid #34D399",
+        },
+      });
       router.push("/");
     } catch (error: any) {
-      setError("登入失敗：" + error.message);
+      toast.error("登入失敗：" + error.message, {
+        style: {
+          background: "#FEE2E2",
+          color: "#991B1B",
+          border: "1px solid #F87171",
+        },
+      });
     }
   };
 
@@ -54,29 +89,6 @@ export default function Login() {
       {/* 右側登入表單 */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="max-w-md w-full">
-          {/* 手機版返回按鈕 */}
-          <div className="lg:hidden mb-8">
-            <Link
-              href="/"
-              className="inline-flex items-center text-gray-600 hover:text-gray-900"
-            >
-              <svg
-                className="w-5 h-5 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
-              返回首頁
-            </Link>
-          </div>
-
           <div className="text-center mb-8">
             <h2 className="text-3xl font-display font-bold text-gray-900">
               歡迎回來
@@ -102,6 +114,7 @@ export default function Login() {
                 placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onKeyPress={handleKeyPress}
               />
             </div>
 
@@ -116,6 +129,7 @@ export default function Login() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onKeyPress={handleKeyPress}
               />
             </div>
 

@@ -8,10 +8,10 @@ export default function Logo() {
       className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
     >
       <Image
-        src="/next.svg"
+        src="/logo.png"
         alt="美食分享"
-        width={32}
-        height={32}
+        width={40}
+        height={40}
         className="w-8 h-8"
       />
       <span className="text-lg font-display font-bold bg-gradient-to-r from-orange-600 to-pink-600 text-transparent bg-clip-text">
