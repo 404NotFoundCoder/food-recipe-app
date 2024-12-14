@@ -236,43 +236,45 @@ export default function CommentSection({
               )}
             </div>
 
-            {/* 回覆區域 */}
-            {repliesMap[comment.id]?.map((reply) => (
-              <div
-                key={reply.id}
-                className="ml-12 mt-3 bg-white rounded-2xl shadow-sm p-6 space-y-4"
-              >
-                {/* 回覆內容，類似主評論的結構 */}
-                <div className="flex items-center gap-4">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-100 to-pink-100 flex items-center justify-center">
-                    <FontAwesomeIcon
-                      icon={faUser}
-                      className="w-4 h-4 text-orange-600"
-                    />
-                  </div>
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      {reply.userName}
+            {/* 回覆列表 */}
+            {comment.replies && comment.replies.length > 0 && (
+              <div className="mt-3 space-y-3 pl-12">
+                {comment.replies.map((reply) => (
+                  <div
+                    key={reply.id}
+                    className="bg-white rounded-2xl shadow-sm p-6 space-y-4"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-100 to-pink-100 flex items-center justify-center">
+                        <FontAwesomeIcon
+                          icon={faUser}
+                          className="w-4 h-4 text-orange-600"
+                        />
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900">
+                          {reply.userName}
+                        </div>
+                        <span className="text-sm text-gray-500">
+                          {new Date(
+                            reply.createdAt?.toDate()
+                          ).toLocaleDateString("zh-TW", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-sm text-gray-500">
-                      {new Date(reply.createdAt?.toDate()).toLocaleDateString(
-                        "zh-TW",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }
-                      )}
-                    </span>
+                    <p className="text-gray-600 pl-12">{reply.content}</p>
                   </div>
-                </div>
-                <p className="text-gray-600 pl-12">{reply.content}</p>
+                ))}
               </div>
-            ))}
+            )}
 
             {/* 回覆表單 */}
             {replyTo === comment.id && user && (
-              <div className="ml-12 mt-3">
+              <div className="mt-3 pl-12">
                 <CommentForm parentId={comment.id} />
               </div>
             )}

@@ -48,21 +48,36 @@ export default function RecipeDetailPage() {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        // 獲取食譜資料
         const recipeData = { id: docSnap.id, ...docSnap.data() } as Recipe;
 
-        // 獲取評論
+        // 獲取所有評論
         const commentsRef = collection(db, "recipes", id as string, "comments");
         const commentsSnap = await getDocs(commentsRef);
-        const commentsData = commentsSnap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as unknown as Comment[];
+        const commentsPromises = commentsSnap.docs.map(async (doc) => {
+          const comment = { id: doc.id, ...doc.data() } as Comment;
 
-        // 合併資料
+          // 獲取每個評論的回覆
+          const repliesRef = collection(
+            db,
+            "recipes",
+            id as string,
+            "comments",
+            doc.id,
+            "replies"
+          );
+          const repliesSnap = await getDocs(repliesRef);
+          const replies = repliesSnap.docs.map(
+            (replyDoc) => ({ id: replyDoc.id, ...replyDoc.data() } as Comment)
+          );
+
+          return { ...comment, replies };
+        });
+
+        const commentsWithReplies = await Promise.all(commentsPromises);
+
         setRecipe({
           ...recipeData,
-          comments: commentsData,
+          comments: commentsWithReplies,
         });
       }
     } catch (error) {
@@ -117,51 +132,87 @@ export default function RecipeDetailPage() {
         content,
         createdAt: serverTimestamp(),
         ...(rating !== undefined && { rating }),
-        ...(parentId && { parentId }),
       };
 
-      // 添加評論到 Firebase
-      const docRef = await addDoc(
-        collection(db, "recipes", recipe.id, "comments"),
-        commentData
-      );
+      let newComment: Comment;
 
-      // 更新本地狀態，使用 Timestamp 對象
-      const newComment = {
-        ...commentData,
-        id: docRef.id,
-        createdAt: {
-          toDate: () => new Date(), // 模擬 Firestore Timestamp 的 toDate 方法
-        },
-      };
+      if (parentId) {
+        // 添加回覆到父評論的子集合
+        const replyRef = await addDoc(
+          collection(db, "recipes", recipe.id, "comments", parentId, "replies"),
+          commentData
+        );
 
-      if (!parentId && rating !== undefined) {
-        const newTotalRatings = (recipe.totalRatings || 0) + 1;
-        const newAverageRating =
-          ((recipe.averageRating || 0) * (recipe.totalRatings || 0) + rating) /
-          newTotalRatings;
+        newComment = {
+          ...commentData,
+          id: replyRef.id,
+          createdAt: {
+            toDate: () => new Date(),
+          },
+        };
 
-        await updateDoc(doc(db, "recipes", recipe.id), {
-          averageRating: newAverageRating,
-          totalRatings: newTotalRatings,
-        });
-
-        // 更新本地食譜狀態
-        setRecipe({
-          ...recipe,
-          averageRating: newAverageRating,
-          totalRatings: newTotalRatings,
-          comments: [...(recipe.comments || []), newComment],
-        });
-      } else {
         // 更新本地狀態
         setRecipe((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
-            comments: [...(prev.comments || []), newComment],
+            comments: prev.comments?.map((comment) =>
+              comment.id === parentId
+                ? {
+                    ...comment,
+                    replies: [...(comment.replies || []), newComment],
+                  }
+                : comment
+            ),
           };
         });
+      } else {
+        // 添加頂層評論
+        const commentRef = await addDoc(
+          collection(db, "recipes", recipe.id, "comments"),
+          commentData
+        );
+
+        newComment = {
+          ...commentData,
+          id: commentRef.id,
+          createdAt: {
+            toDate: () => new Date(),
+          },
+          replies: [],
+        };
+
+        // 處理評分更新
+        if (rating !== undefined) {
+          const newTotalRatings = (recipe.totalRatings || 0) + 1;
+          const newAverageRating =
+            ((recipe.averageRating || 0) * (recipe.totalRatings || 0) +
+              rating) /
+            newTotalRatings;
+
+          await updateDoc(doc(db, "recipes", recipe.id), {
+            averageRating: newAverageRating,
+            totalRatings: newTotalRatings,
+          });
+
+          setRecipe((prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              averageRating: newAverageRating,
+              totalRatings: newTotalRatings,
+              comments: [...(prev.comments || []), newComment],
+            };
+          });
+        } else {
+          setRecipe((prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              comments: [...(prev.comments || []), newComment],
+            };
+          });
+        }
       }
     } catch (error) {
       console.error("Error adding comment:", error);
