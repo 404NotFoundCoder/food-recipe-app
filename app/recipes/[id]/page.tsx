@@ -18,6 +18,7 @@ import {
   faListOl,
   faToggleOn,
   faToggleOff,
+  faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-hot-toast";
 
@@ -102,6 +103,16 @@ export default function RecipeDetailPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="mb-6">
+        <Link
+          href="/recipes"
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-orange-500 transition-colors"
+        >
+          <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4" />
+          <span>返回食譜列表</span>
+        </Link>
+      </div>
+
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-8">
         <div className="p-8">
           <div className="flex justify-between items-start mb-6">
