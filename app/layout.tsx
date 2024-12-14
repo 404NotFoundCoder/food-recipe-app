@@ -3,6 +3,11 @@ import { Noto_Sans_TC, Playfair_Display, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./contexts/AuthContext";
 import { Toaster } from "react-hot-toast";
+import { config } from "@fortawesome/fontawesome-svg-core";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+
+// 防止 Font Awesome 圖標閃爍
+config.autoAddCss = false;
 
 // 主要文字字體
 const notoSansTC = Noto_Sans_TC({
@@ -35,6 +40,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-TW" suppressHydrationWarning>
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        />
+      </head>
       <body
         className={`${notoSansTC.variable} ${playfair.variable} ${geistMono.variable} font-sans antialiased`}
         suppressHydrationWarning

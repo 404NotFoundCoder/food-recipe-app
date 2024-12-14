@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useAuth } from "./contexts/AuthContext";
 import Logo from "./components/Logo";
 import UserMenu from "./components/UserMenu";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 export default function Home() {
   const { user } = useAuth();
@@ -66,6 +68,13 @@ export default function Home() {
                 className="bg-white text-gray-800 px-8 py-3 rounded-full text-lg font-medium hover:bg-gray-50 transition-all transform hover:scale-105 shadow-md border border-gray-200"
               >
                 加入討論
+              </Link>
+              <Link
+                href="/recipes/new"
+                className="bg-white text-gray-800 px-8 py-3 rounded-full text-lg font-medium hover:bg-gray-50 transition-all transform hover:scale-105 shadow-md border border-gray-200 flex items-center gap-2"
+              >
+                <FontAwesomeIcon icon={faPlus} className="w-5 h-5" />
+                分享食譜
               </Link>
             </div>
           </div>
