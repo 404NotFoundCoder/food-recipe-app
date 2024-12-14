@@ -46,9 +46,28 @@ export default function NewRecipePage() {
       return;
     }
 
-    // 表單驗證...
+    // 表單驗證
     if (!formData.title.trim()) {
       toast.error("請輸入食譜名稱");
+      return;
+    }
+
+    if (!formData.description.trim()) {
+      toast.error("請輸入食譜簡介");
+      return;
+    }
+
+    const validIngredients = formData.ingredients.filter(
+      (i) => i.name.trim() && i.amount.trim() && i.unit.trim()
+    );
+    if (validIngredients.length === 0) {
+      toast.error("請至少新增一個食材");
+      return;
+    }
+
+    const validSteps = formData.steps.filter((s) => s.content.trim());
+    if (validSteps.length === 0) {
+      toast.error("請至少新增一個步驟");
       return;
     }
 
@@ -57,10 +76,15 @@ export default function NewRecipePage() {
       const recipeData = {
         title: formData.title.trim(),
         description: formData.description.trim(),
-        ingredients: formData.ingredients.filter((i) => i.name.trim()),
-        steps: formData.steps
-          .filter((s) => s.content.trim())
-          .map((s) => s.content.trim()),
+        ingredients: validIngredients.map((i) => ({
+          name: i.name.trim(),
+          amount: i.amount.trim(),
+          unit: i.unit.trim(),
+        })),
+        steps: validSteps.map((s, index) => ({
+          number: index + 1,
+          content: s.content.trim(),
+        })),
         authorId: user.uid,
         authorName: user.displayName || "匿名用戶",
         createdAt: serverTimestamp(),

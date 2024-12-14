@@ -52,7 +52,7 @@ export default function RecipesPage() {
             href="/recipes/new"
             className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-6 py-2 rounded-full hover:from-orange-600 hover:to-pink-600 transition-colors"
           >
-            新增食譜
+            分享食譜
           </Link>
         )}
       </div>
