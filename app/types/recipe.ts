@@ -13,6 +13,7 @@ export interface Comment {
   id: string;
   userId: string;
   userName: string;
+  userPhotoURL?: string;
   rating?: number;
   content: string;
   createdAt: any;
