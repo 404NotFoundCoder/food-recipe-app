@@ -328,6 +328,7 @@ export default function CommentSection({
                       src={comment.userPhotoURL}
                       alt={comment.userName}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   ) : (
                     <FontAwesomeIcon
@@ -388,6 +389,7 @@ export default function CommentSection({
                             src={reply.userPhotoURL}
                             alt={reply.userName}
                             className="w-full h-full object-cover"
+                            loading="lazy"
                           />
                         ) : (
                           <FontAwesomeIcon

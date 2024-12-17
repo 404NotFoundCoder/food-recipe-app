@@ -129,6 +129,7 @@ export default function RecipeDetailPage() {
       const commentData = {
         userId: user.uid,
         userName: user.displayName || "匿名用戶",
+        userPhotoURL: user.photoURL || null,
         content,
         createdAt: serverTimestamp(),
         ...(rating !== undefined && { rating }),
