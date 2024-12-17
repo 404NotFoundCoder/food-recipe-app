@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useCallback } from "react";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { Comment } from "@/app/types/recipe";
 import StarRating from "./StarRating";
@@ -27,69 +27,31 @@ interface CommentSectionProps {
   ) => Promise<void>;
 }
 
-export default function CommentSection({
-  recipeId,
-  comments,
-  averageRating,
-  totalRatings,
-  onAddCommentAction,
-}: CommentSectionProps) {
-  const { user } = useAuth();
-  const [newRating, setNewRating] = useState(5);
-  const [content, setContent] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [replyTo, setReplyTo] = useState<string | null>(null);
-  const [showRating, setShowRating] = useState(false);
-  const [localComments, setLocalComments] = useState(comments);
-  const [localAverageRating, setLocalAverageRating] = useState(averageRating);
-  const [localTotalRatings, setLocalTotalRatings] = useState(totalRatings);
-  const router = useRouter();
-
-  useEffect(() => {
-    setLocalComments(comments);
-    setLocalAverageRating(averageRating);
-    setLocalTotalRatings(totalRatings);
-  }, [comments, averageRating, totalRatings]);
-
-  // 過濾出頂層評論和回覆
-  const topLevelComments = localComments.filter((comment) => !comment.parentId);
-  const repliesMap = localComments.reduce((acc, comment) => {
-    if (comment.parentId) {
-      if (!acc[comment.parentId]) acc[comment.parentId] = [];
-      acc[comment.parentId].push(comment);
-    }
-    return acc;
-  }, {} as Record<string, Comment[]>);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content.trim()) return;
-
-    setIsSubmitting(true);
-    try {
-      await onAddCommentAction(
-        showRating ? newRating : undefined,
-        content.trim(),
-        replyTo
-      );
-      setContent("");
-      setNewRating(5);
-      setReplyTo(null);
-      setShowRating(false);
-      router.refresh();
-    } catch (error) {
-      console.error("Error submitting comment:", error);
-      toast.error("評論發布失敗，請稍後再試");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const CommentForm = ({ parentId = null }: { parentId?: string | null }) => (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white rounded-2xl shadow-sm p-6"
-    >
+const CommentForm = memo(
+  ({
+    parentId = null,
+    content,
+    setContent,
+    showRating,
+    setShowRating,
+    newRating,
+    setNewRating,
+    setReplyTo,
+    isSubmitting,
+    onSubmit,
+  }: {
+    parentId?: string | null;
+    content: string;
+    setContent: (content: string) => void;
+    showRating: boolean;
+    setShowRating: (show: boolean) => void;
+    newRating: number;
+    setNewRating: (rating: number) => void;
+    setReplyTo: (replyTo: string | null) => void;
+    isSubmitting: boolean;
+    onSubmit: (e: React.FormEvent) => void;
+  }) => (
+    <form onSubmit={onSubmit} className="bg-white rounded-2xl shadow-sm p-6">
       <div className="flex items-start gap-4">
         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-100 to-pink-100 flex items-center justify-center flex-shrink-0">
           <FontAwesomeIcon icon={faUser} className="w-5 h-5 text-orange-600" />
@@ -149,6 +111,70 @@ export default function CommentSection({
         </div>
       </div>
     </form>
+  )
+);
+
+CommentForm.displayName = "CommentForm";
+
+export default function CommentSection({
+  recipeId,
+  comments,
+  averageRating,
+  totalRatings,
+  onAddCommentAction,
+}: CommentSectionProps) {
+  const { user } = useAuth();
+  const [newRating, setNewRating] = useState(5);
+  const [content, setContent] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [replyTo, setReplyTo] = useState<string | null>(null);
+  const [showRating, setShowRating] = useState(false);
+  const [localComments, setLocalComments] = useState(comments);
+  const [localAverageRating, setLocalAverageRating] = useState(averageRating);
+  const [localTotalRatings, setLocalTotalRatings] = useState(totalRatings);
+  const router = useRouter();
+
+  useEffect(() => {
+    setLocalComments(comments);
+    setLocalAverageRating(averageRating);
+    setLocalTotalRatings(totalRatings);
+  }, [comments, averageRating, totalRatings]);
+
+  // 過濾出頂層評論和回覆
+  const topLevelComments = localComments.filter((comment) => !comment.parentId);
+  const repliesMap = localComments.reduce((acc, comment) => {
+    if (comment.parentId) {
+      if (!acc[comment.parentId]) acc[comment.parentId] = [];
+      acc[comment.parentId].push(comment);
+    }
+    return acc;
+  }, {} as Record<string, Comment[]>);
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!content.trim()) return;
+
+      setIsSubmitting(true);
+      try {
+        await onAddCommentAction(
+          showRating ? newRating : undefined,
+          content.trim(),
+          replyTo
+        );
+        setContent("");
+        setNewRating(5);
+        setReplyTo(null);
+        setShowRating(false);
+        router.refresh();
+      } catch (error) {
+        console.error("Error submitting comment:", error);
+        toast.error("評論發布失敗，請稍後再試");
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [content, showRating, newRating, replyTo, onAddCommentAction, router]
   );
 
   return (
@@ -180,13 +206,25 @@ export default function CommentSection({
             成為第一個評價的人
           </h3>
           <p className="text-gray-600 max-w-md mx-auto">
-            這道料理還沒有評價。分享您的用餐體驗，幫助其他人更了解這道美食！
+            這道料理還沒有評價。分享您的用餐體���，幫助其他人更了解這道美食！
           </p>
         </div>
       )}
 
       {/* 評論輸入區域 */}
-      {user && !replyTo && <CommentForm />}
+      {user && !replyTo && (
+        <CommentForm
+          content={content}
+          setContent={setContent}
+          showRating={showRating}
+          setShowRating={setShowRating}
+          newRating={newRating}
+          setNewRating={setNewRating}
+          setReplyTo={setReplyTo}
+          isSubmitting={isSubmitting}
+          onSubmit={handleSubmit}
+        />
+      )}
 
       {/* 評論列表 */}
       <div className="space-y-6">
@@ -275,7 +313,18 @@ export default function CommentSection({
             {/* 回覆表單 */}
             {replyTo === comment.id && user && (
               <div className="mt-3 pl-12">
-                <CommentForm parentId={comment.id} />
+                <CommentForm
+                  parentId={comment.id}
+                  content={content}
+                  setContent={setContent}
+                  showRating={showRating}
+                  setShowRating={setShowRating}
+                  newRating={newRating}
+                  setNewRating={setNewRating}
+                  setReplyTo={setReplyTo}
+                  isSubmitting={isSubmitting}
+                  onSubmit={handleSubmit}
+                />
               </div>
             )}
           </div>
