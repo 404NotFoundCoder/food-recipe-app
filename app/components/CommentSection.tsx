@@ -81,15 +81,15 @@ const CommentForm = memo(
                 }}
                 className="flex items-center gap-3 text-gray-500 hover:text-orange-500 transition-colors"
               >
-                <div className="relative w-12 h-7">
+                <div className="relative w-10 h-6">
                   <div
                     className={`absolute inset-0 rounded-full transition-colors duration-200 ease-in-out ${
                       showRating ? "bg-orange-500" : "bg-gray-200"
                     }`}
                   />
                   <div
-                    className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transform transition-transform duration-200 ease-in-out ${
-                      showRating ? "translate-x-5" : "translate-x-0"
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-200 ease-in-out ${
+                      showRating ? "translate-x-4" : "translate-x-0"
                     }`}
                   />
                 </div>
