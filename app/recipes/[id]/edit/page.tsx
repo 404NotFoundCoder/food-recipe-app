@@ -13,9 +13,12 @@ import {
   faListOl,
   faArrowLeft,
   faExchange,
+  faSignal,
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import { LoadingSpinner } from "@/app/components/LoadingSpinner";
+import { Recipe, Ingredient, Step } from "@/app/types/recipe";
+import DifficultySelector from "@/app/components/DifficultySelector";
 
 const COMMON_UNITS = [
   "克",
@@ -40,8 +43,9 @@ export default function EditRecipePage() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    ingredients: [{ name: "", amount: "", unit: "" }],
-    steps: [{ content: "" }],
+    ingredients: [] as Ingredient[],
+    steps: [] as Step[],
+    difficulty: "medium" as "easy" | "medium" | "hard",
   });
 
   useEffect(() => {
@@ -56,6 +60,7 @@ export default function EditRecipePage() {
             description: data.description,
             ingredients: data.ingredients,
             steps: data.steps.map((s: any) => ({ content: s.content })),
+            difficulty: data.difficulty,
           });
 
           // 檢查是否為作者
@@ -130,6 +135,7 @@ export default function EditRecipePage() {
           content: s.content.trim(),
         })),
         updatedAt: new Date(),
+        difficulty: formData.difficulty,
       };
 
       await updateDoc(doc(db, "recipes", id as string), recipeData);
@@ -352,6 +358,11 @@ export default function EditRecipePage() {
             </button>
           </div>
         </div>
+
+        <DifficultySelector
+          value={formData.difficulty}
+          onChange={(value) => setFormData({ ...formData, difficulty: value })}
+        />
 
         {/* 更新按鈕 */}
         <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 -mx-4">

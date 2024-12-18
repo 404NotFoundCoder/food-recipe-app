@@ -45,8 +45,9 @@
 #### 1. 食譜管理
 
 - [x] 食譜發布與編輯
-- [ ] 食譜分類與標籤
-- [ ] 搜尋與篩選功能
+- [x] 食譜搜尋與排序
+- [x] 難度分類與篩選
+- [x] 評分系統
 
 #### 2. 社交功能
 
@@ -103,7 +104,7 @@ public/
    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
    NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 
-4. 啟動開發服務器：
+4. 起動開發服務器：
    ```bash
    npm run dev
    ```

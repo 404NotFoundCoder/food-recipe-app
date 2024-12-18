@@ -20,6 +20,7 @@ import {
   faToggleOff,
   faArrowLeft,
   faComments,
+  faStar,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-hot-toast";
 import CommentSection from "@/app/components/CommentSection";
@@ -222,6 +223,18 @@ export default function RecipeDetailPage() {
     }
   };
 
+  const difficultyColors = {
+    easy: "bg-green-100 text-green-800",
+    medium: "bg-yellow-100 text-yellow-800",
+    hard: "bg-red-100 text-red-800",
+  };
+
+  const difficultyLabels = {
+    easy: "簡單",
+    medium: "中等",
+    hard: "困難",
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -258,7 +271,38 @@ export default function RecipeDetailPage() {
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-8">
         <div className="p-8">
           <div className="flex justify-between items-start mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">{recipe.title}</h1>
+            <div className="space-y-4">
+              <h1 className="text-3xl font-bold text-gray-900">
+                {recipe.title}
+              </h1>
+              <div className="flex items-center gap-4">
+                <span
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                    difficultyColors[recipe.difficulty]
+                  }`}
+                >
+                  {difficultyLabels[recipe.difficulty]}
+                </span>
+
+                <div className="flex items-center gap-1">
+                  <FontAwesomeIcon
+                    icon={faStar}
+                    className="w-5 h-5 text-yellow-400"
+                  />
+                  <span className="text-lg">
+                    {recipe.averageRating
+                      ? recipe.averageRating.toFixed(1)
+                      : "尚無評分"}
+                  </span>
+                  {recipe.totalRatings && (
+                    <span className="text-gray-500">
+                      ({recipe.totalRatings} 則評價)
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {user?.uid === recipe.authorId && (
               <div className="flex gap-2">
                 <button

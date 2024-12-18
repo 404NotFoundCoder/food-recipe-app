@@ -12,8 +12,11 @@ import {
   faUtensils,
   faListOl,
   faArrowLeft,
+  faFileText,
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
+import { Difficulty } from "@/app/types/recipe";
+import DifficultySelector from "@/app/components/DifficultySelector";
 
 const COMMON_UNITS = [
   "克",
@@ -38,6 +41,7 @@ export default function NewRecipePage() {
     description: "",
     ingredients: [{ name: "", amount: "", unit: "" }],
     steps: [{ content: "" }],
+    difficulty: "medium" as Difficulty,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,6 +94,9 @@ export default function NewRecipePage() {
         authorId: user.uid,
         authorName: user.displayName || "匿名用戶",
         createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        difficulty: formData.difficulty,
+        cookingTime: 30,
       };
 
       const docRef = await addDoc(collection(db, "recipes"), recipeData);
@@ -121,7 +128,7 @@ export default function NewRecipePage() {
           分享美食食譜
         </h1>
         <p className="text-gray-600">
-          記錄您的獨特配方，與美食愛好者分享烹飪樂趣
+          記錄您的獨家配方，與美食愛好者分享烹飪樂趣
         </p>
       </div>
 
@@ -175,34 +182,11 @@ export default function NewRecipePage() {
           <div className="p-6 border-b border-gray-100">
             <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-900">
               <FontAwesomeIcon
-                icon={faListOl}
-                className="w-5 h-5 text-orange-500" // 明確設定固定大小
-                style={{ minWidth: "1.25rem" }} // 確保最小寬度
+                icon={faFileText}
+                className="w-5 h-5 text-orange-500"
               />
               食材清單
             </h2>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {COMMON_UNITS.map((unit) => (
-                <button
-                  key={unit}
-                  type="button"
-                  onClick={() => {
-                    // 找到最後一個食材
-                    const lastIngredient =
-                      formData.ingredients[formData.ingredients.length - 1];
-                    if (lastIngredient) {
-                      const newIngredients = [...formData.ingredients];
-                      newIngredients[formData.ingredients.length - 1].unit =
-                        unit;
-                      setFormData({ ...formData, ingredients: newIngredients });
-                    }
-                  }}
-                  className="px-3 py-1.5 text-sm bg-orange-50 text-orange-600 rounded-full hover:bg-orange-100 transition-colors border border-orange-100 font-medium"
-                >
-                  {unit}
-                </button>
-              ))}
-            </div>
           </div>
           <div className="p-6 space-y-4">
             {formData.ingredients.map((ingredient, index) => (
@@ -269,8 +253,7 @@ export default function NewRecipePage() {
             <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-900">
               <FontAwesomeIcon
                 icon={faListOl}
-                className="w-5 h-5 text-orange-500" // 明確設定固定大小
-                style={{ minWidth: "1.25rem" }} // 確保最小寬度
+                className="w-5 h-5 text-orange-500"
               />
               烹飪步驟
             </h2>
@@ -309,6 +292,12 @@ export default function NewRecipePage() {
             </button>
           </div>
         </div>
+
+        {/* 難度選擇 */}
+        <DifficultySelector
+          value={formData.difficulty}
+          onChange={(value) => setFormData({ ...formData, difficulty: value })}
+        />
 
         {/* 發布按鈕 */}
         <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 -mx-4">

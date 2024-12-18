@@ -6,7 +6,11 @@ import { deleteDoc, doc } from "firebase/firestore";
 import { toast } from "react-hot-toast";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPenToSquare,
+  faTrash,
+  faStar,
+} from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 
 interface RecipeCardProps {
@@ -19,6 +23,18 @@ export default function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const router = useRouter();
+
+  const difficultyColors = {
+    easy: "bg-green-100 text-green-800",
+    medium: "bg-yellow-100 text-yellow-800",
+    hard: "bg-red-100 text-red-800",
+  };
+
+  const difficultyLabels = {
+    easy: "簡單",
+    medium: "中等",
+    hard: "困難",
+  };
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -40,14 +56,15 @@ export default function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
         href={`/recipes/${recipe.id}`}
         className="block hover:opacity-75 transition-opacity relative group"
       >
-        <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-          <div className="p-6">
+        <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
+          <div className="p-6 flex flex-col flex-grow">
             <div className="flex justify-between items-start mb-4">
-              <h2 className="text-xl font-semibold line-clamp-1">
+              <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
                 {recipe.title}
-              </h2>
+              </h3>
+
               {user?.uid === recipe.authorId && (
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-shrink-0 ml-2">
                   <button
                     onClick={(e) => {
                       e.preventDefault();
@@ -71,23 +88,53 @@ export default function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
                 </div>
               )}
             </div>
-            <p className="text-gray-600 text-sm mb-4 line-clamp-2 h-10">
+
+            <div className="flex items-center gap-4 mb-4">
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  difficultyColors[recipe.difficulty]
+                }`}
+              >
+                {difficultyLabels[recipe.difficulty]}
+              </span>
+
+              <div className="flex items-center gap-1">
+                <FontAwesomeIcon
+                  icon={faStar}
+                  className="w-4 h-4 text-yellow-400"
+                />
+                <span className="text-sm text-gray-600">
+                  {recipe.averageRating
+                    ? recipe.averageRating.toFixed(1)
+                    : "尚無評分"}
+                </span>
+                {recipe.totalRatings && (
+                  <span className="text-sm text-gray-400">
+                    ({recipe.totalRatings} 則評價)
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-grow">
               {recipe.description}
             </p>
-            <div className="text-sm text-gray-500">
+
+            <div className="text-sm text-gray-500 mt-auto">
               <p className="flex items-center gap-2">
                 <span className="truncate max-w-[100px]">
                   {recipe.authorName}
                 </span>
                 <span className="w-1 h-1 rounded-full bg-gray-300 flex-shrink-0" />
                 <span className="flex-shrink-0">
-                  {new Date(recipe.createdAt?.toDate())
-                    .toLocaleDateString("zh-TW", {
+                  {new Date(recipe.createdAt?.toDate()).toLocaleDateString(
+                    "zh-TW",
+                    {
                       year: "numeric",
                       month: "2-digit",
                       day: "2-digit",
-                    })
-                    .replace(/\//g, "/")}
+                    }
+                  )}
                 </span>
               </p>
             </div>
@@ -95,7 +142,6 @@ export default function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
         </div>
       </Link>
 
-      {/* 刪除確認彈窗 */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div

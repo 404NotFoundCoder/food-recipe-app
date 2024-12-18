@@ -5,7 +5,7 @@ export interface Ingredient {
 }
 
 export interface Step {
-  number: number;
+  number?: number;
   content: string;
 }
 
@@ -21,6 +21,8 @@ export interface Comment {
   replies?: Comment[];
 }
 
+export type Difficulty = "easy" | "medium" | "hard";
+
 export interface Recipe {
   id: string;
   title: string;
@@ -34,4 +36,6 @@ export interface Recipe {
   averageRating?: number;
   totalRatings?: number;
   comments?: Comment[];
+  difficulty: Difficulty;
+  cookingTime: number;
 }
