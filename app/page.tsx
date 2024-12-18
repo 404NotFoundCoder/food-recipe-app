@@ -6,7 +6,11 @@ import { useAuth } from "./contexts/AuthContext";
 import Logo from "./components/Logo";
 import UserMenu from "./components/UserMenu";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPlus,
+  faComments,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function Home() {
   const { user } = useAuth();
@@ -32,12 +36,6 @@ export default function Home() {
                   登入
                 </Link>
               )}
-              <Link
-                href="/register"
-                className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white px-6 py-2 rounded-full transition-all transform hover:scale-105 shadow-md"
-              >
-                開始分享
-              </Link>
             </div>
           </div>
         </div>
@@ -109,24 +107,25 @@ export default function Home() {
 
             <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow">
               <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mb-4">
-                <svg
+                <FontAwesomeIcon
+                  icon={faComments}
                   className="w-6 h-6 text-pink-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                  />
-                </svg>
+                />
               </div>
               <h3 className="text-xl font-semibold mb-2">即時交流</h3>
-              <p className="text-gray-600">
-                與美食愛好者即時討論，分享心得，獲取寶貴建議
+              <p className="text-gray-600 mb-4">
+                加入美食聊天室，與同好即時分享烹飪心得與美食體驗
               </p>
+              <Link
+                href="/chat"
+                className="inline-flex items-center text-pink-600 hover:text-pink-700 font-medium"
+              >
+                <span>進入聊天室</span>
+                <FontAwesomeIcon
+                  icon={faChevronRight}
+                  className="w-4 h-4 ml-1"
+                />
+              </Link>
             </div>
 
             <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow">

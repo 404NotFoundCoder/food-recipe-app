@@ -19,6 +19,7 @@ import {
   faToggleOn,
   faToggleOff,
   faArrowLeft,
+  faComments,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-hot-toast";
 import CommentSection from "@/app/components/CommentSection";
@@ -504,6 +505,15 @@ export default function RecipeDetailPage() {
           </div>
         </div>
       )}
+
+      <div className="fixed bottom-6 right-6">
+        <Link
+          href={`/chat?recipeId=${recipe.id}`}
+          className="bg-gradient-to-r from-orange-500 to-pink-500 text-white p-4 rounded-full hover:from-orange-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
+        >
+          <FontAwesomeIcon icon={faComments} className="w-6 h-6" />
+        </Link>
+      </div>
     </div>
   );
 }
