@@ -45,21 +45,40 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <nav className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center">
               <Logo />
             </div>
 
-            <div className="flex items-center space-x-4">
-              {user ? (
-                <UserMenu />
-              ) : (
+            <div className="flex items-center space-x-8">
+              <div className="flex items-center space-x-1">
                 <Link
-                  href="/login"
-                  className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-6 py-2 rounded-full hover:from-orange-600 hover:to-pink-600 transition-colors"
+                  href="/recipes"
+                  className="px-4 py-2 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-all font-medium text-sm flex items-center gap-2"
                 >
-                  登入
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
+                  探索食譜
                 </Link>
-              )}
+                <Link
+                  href="/chat"
+                  className="px-4 py-2 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-all font-medium text-sm flex items-center gap-2"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
+                  聊天室
+                </Link>
+              </div>
+
+              <div className="flex items-center">
+                {user ? (
+                  <UserMenu />
+                ) : (
+                  <Link
+                    href="/login"
+                    className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-6 py-2 rounded-full hover:from-orange-600 hover:to-pink-600 transition-colors"
+                  >
+                    登入
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </div>
