@@ -13,6 +13,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
+import { db } from "@/app/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 interface ChatListProps {
   currentChatId?: string | null;
@@ -61,6 +63,9 @@ export default function ChatList({ currentChatId }: ChatListProps) {
 
     setIsCreating(true);
     try {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const userData = userDoc.data();
+
       const chatsRef = ref(rtdb, "chats");
       const newChatRef = push(chatsRef);
 
@@ -69,7 +74,12 @@ export default function ChatList({ currentChatId }: ChatListProps) {
         createdBy: user.uid,
         createdAt: Date.now(),
         members: {
-          [user.uid]: true,
+          [user.uid]: {
+            email: userData?.email || user.email,
+            displayName: userData?.displayName || user.displayName,
+            photoURL: userData?.photoURL || user.photoURL,
+            joinedAt: Date.now(),
+          },
         },
       });
 
@@ -77,6 +87,7 @@ export default function ChatList({ currentChatId }: ChatListProps) {
       setNewChatTitle("");
       router.push(`/chat?id=${newChatRef.key}`);
     } catch (error) {
+      console.error("創建聊天室失敗:", error);
       toast.error("創建聊天室失敗，請稍後再試");
     } finally {
       setIsCreating(false);

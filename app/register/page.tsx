@@ -14,6 +14,8 @@ import Image from "next/image";
 import GoogleSignInButton from "@/app/components/GoogleSignInButton";
 import Logo from "@/app/components/Logo";
 import { toast } from "react-hot-toast";
+import { db } from "@/app/lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -37,10 +39,23 @@ export default function Register() {
         password
       );
       await updateProfile(user, { displayName: name });
+
+      // 將用戶資料存儲到 Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        email: user.email,
+        displayName: name,
+        photoURL: user.photoURL,
+        emailVerified: user.emailVerified,
+        createdAt: Date.now(),
+        lastLoginAt: Date.now(),
+      });
+
       await sendEmailVerification(user, {
         url: window.location.origin + "/login",
         handleCodeInApp: false,
       });
+
       toast.success("註冊成功！請查看您的電子郵件以完成驗證。", {
         duration: 5000,
         style: {

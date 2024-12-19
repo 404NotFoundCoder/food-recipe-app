@@ -15,7 +15,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-hot-toast";
 import { getAuth } from "firebase/auth";
-import { fetchSignInMethodsForEmail } from "firebase/auth";
+import { db } from "@/app/lib/firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 interface ChatRoomProps {
   recipeId?: string;
@@ -106,11 +107,19 @@ export default function ChatRoom({
 
     setAddingUser(true);
     try {
-      const auth = getAuth();
-      const signInMethods = await fetchSignInMethodsForEmail(auth, newEmail);
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("email", "==", newEmail));
+      const querySnapshot = await getDocs(q);
 
-      if (signInMethods.length === 0) {
-        toast.error("此郵箱尚未註冊");
+      if (querySnapshot.empty) {
+        toast.error("找不到此用戶");
+        return;
+      }
+
+      const targetUser = querySnapshot.docs[0].data();
+
+      if (!targetUser.emailVerified) {
+        toast.error("此用戶尚未驗證郵箱");
         return;
       }
 
@@ -119,10 +128,20 @@ export default function ChatRoom({
       const chatSnapshot = await get(chatRef);
       const chatData = chatSnapshot.val() || {};
 
+      if (chatData.members && chatData.members[targetUser.uid]) {
+        toast.error("此用戶已在聊天室中");
+        return;
+      }
+
       await update(chatRef, {
         members: {
           ...(chatData.members || {}),
-          [newEmail.replace(/[.#$[\]]/g, "_")]: true,
+          [targetUser.uid]: {
+            email: targetUser.email,
+            displayName: targetUser.displayName,
+            photoURL: targetUser.photoURL,
+            joinedAt: Date.now(),
+          },
         },
       });
 
@@ -130,6 +149,7 @@ export default function ChatRoom({
       setNewEmail("");
       toast.success("用戶已添加到聊天室");
     } catch (error) {
+      console.error("添加用戶失敗:", error);
       toast.error("添加用戶失敗，請稍後再試");
     } finally {
       setAddingUser(false);

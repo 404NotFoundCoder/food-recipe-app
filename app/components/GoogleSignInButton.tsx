@@ -1,9 +1,11 @@
 "use client";
 
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { auth } from "@/app/lib/firebase";
+import { auth, db } from "@/app/lib/firebase";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { doc, setDoc } from "firebase/firestore";
+import { toast } from "react-hot-toast";
 
 export default function GoogleSignInButton() {
   const router = useRouter();
@@ -11,10 +13,29 @@ export default function GoogleSignInButton() {
   const handleGoogleSignIn = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // 將 Google 用戶資料存儲到 Firestore
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          emailVerified: user.emailVerified,
+          createdAt: user.metadata.creationTime,
+          lastLoginAt: Date.now(),
+        },
+        { merge: true }
+      );
+
+      toast.success("登入成功！");
       router.push("/");
     } catch (error: any) {
       console.error("Google 登入失敗:", error);
+      toast.error("Google 登入失敗，請稍後再試");
     }
   };
 

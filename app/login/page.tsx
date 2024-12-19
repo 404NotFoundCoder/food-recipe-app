@@ -9,6 +9,8 @@ import Image from "next/image";
 import GoogleSignInButton from "@/app/components/GoogleSignInButton";
 import Logo from "@/app/components/Logo";
 import { toast } from "react-hot-toast";
+import { db } from "@/app/lib/firebase";
+import { doc, updateDoc } from "firebase/firestore";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -41,6 +43,13 @@ export default function Login() {
         await signOut(auth);
         return;
       }
+
+      // 更新用戶的 emailVerified 狀態
+      await updateDoc(doc(db, "users", userCredential.user.uid), {
+        emailVerified: true,
+        lastLoginAt: Date.now(),
+      });
+
       toast.success("登入成功！", {
         style: {
           background: "#D1FAE5",
