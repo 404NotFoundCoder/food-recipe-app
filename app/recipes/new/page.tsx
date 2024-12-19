@@ -187,6 +187,27 @@ export default function NewRecipePage() {
               />
               食材清單
             </h2>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {COMMON_UNITS.map((unit) => (
+                <button
+                  key={unit}
+                  type="button"
+                  onClick={() => {
+                    const lastIngredient =
+                      formData.ingredients[formData.ingredients.length - 1];
+                    if (lastIngredient) {
+                      const newIngredients = [...formData.ingredients];
+                      newIngredients[formData.ingredients.length - 1].unit =
+                        unit;
+                      setFormData({ ...formData, ingredients: newIngredients });
+                    }
+                  }}
+                  className="px-3 py-1.5 text-sm bg-orange-50 text-orange-600 rounded-full hover:bg-orange-100 transition-colors border border-orange-100 font-medium"
+                >
+                  {unit}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="p-6 space-y-4">
             {formData.ingredients.map((ingredient, index) => (
