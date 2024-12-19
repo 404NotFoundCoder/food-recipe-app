@@ -236,7 +236,7 @@ export default function RecipesPage() {
             )}
 
             <div className="mt-12 w-full max-w-2xl">
-              <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-8 border border-orange-100/50 backdrop-blur-sm">
+              <div className="bg-gradient-to-br from-orange-10 to-pink-10 rounded-2xl p-8 border border-orange-100/50 backdrop-blur-sm">
                 <h3 className="text-lg font-semibold bg-gradient-to-r from-orange-600 to-pink-600 text-transparent bg-clip-text mb-4">
                   分享食譜小提示
                 </h3>

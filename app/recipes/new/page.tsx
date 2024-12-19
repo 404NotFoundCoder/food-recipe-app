@@ -188,46 +188,90 @@ export default function NewRecipePage() {
               食材清單
             </h2>
           </div>
-          <div className="p-6 space-y-4">
-            {formData.ingredients.map((ingredient, index) => (
-              <div key={index} className="flex gap-4">
-                <input
-                  type="text"
-                  placeholder="食材名稱"
-                  value={ingredient.name}
-                  onChange={(e) => {
+          <div className="p-6">
+            {/* 預設單位按鈕組 */}
+            <div className="mb-4 flex flex-wrap gap-2">
+              {COMMON_UNITS.map((unit) => (
+                <button
+                  key={unit}
+                  type="button"
+                  onClick={() => {
                     const newIngredients = [...formData.ingredients];
-                    newIngredients[index].name = e.target.value;
-                    setFormData({ ...formData, ingredients: newIngredients });
-                  }}
-                  className="flex-1 px-4 py-3 rounded-xl bg-gray-50 border-0 focus:ring-2 focus:ring-orange-500 transition-all"
-                />
-                <input
-                  type="text"
-                  placeholder="數量"
-                  value={ingredient.amount}
-                  onChange={(e) => {
-                    const newIngredients = [...formData.ingredients];
-                    newIngredients[index].amount = e.target.value;
-                    setFormData({ ...formData, ingredients: newIngredients });
-                  }}
-                  className="w-24 px-4 py-3 rounded-xl bg-gray-50 border-0 focus:ring-2 focus:ring-orange-500 transition-all"
-                />
-                <div className="relative w-24">
-                  <input
-                    type="text"
-                    placeholder="單位"
-                    value={ingredient.unit}
-                    onChange={(e) => {
-                      const newIngredients = [...formData.ingredients];
-                      newIngredients[index].unit = e.target.value;
+                    if (newIngredients.length > 0) {
+                      const lastIndex = newIngredients.length - 1;
+                      newIngredients[lastIndex].unit = unit;
                       setFormData({ ...formData, ingredients: newIngredients });
-                    }}
-                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border-0 focus:ring-2 focus:ring-orange-500 transition-all"
-                  />
+                    }
+                  }}
+                  className="px-3 py-1.5 rounded-full text-sm bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors"
+                >
+                  {unit}
+                </button>
+              ))}
+            </div>
+
+            {/* 食材輸入區域 */}
+            <div className="space-y-4">
+              {formData.ingredients.map((ingredient, index) => (
+                <div key={index} className="flex gap-4">
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      placeholder="食材名稱"
+                      value={ingredient.name}
+                      onChange={(e) => {
+                        const newIngredients = [...formData.ingredients];
+                        newIngredients[index].name = e.target.value;
+                        setFormData({
+                          ...formData,
+                          ingredients: newIngredients,
+                        });
+                      }}
+                      className="w-full px-4 py-3 rounded-xl bg-gray-50 border-0 focus:ring-2 focus:ring-orange-500 transition-all"
+                    />
+                  </div>
+                  <div className="w-24">
+                    <input
+                      type="text"
+                      placeholder="份量"
+                      value={ingredient.amount}
+                      onChange={(e) => {
+                        const newIngredients = [...formData.ingredients];
+                        newIngredients[index].amount = e.target.value;
+                        setFormData({
+                          ...formData,
+                          ingredients: newIngredients,
+                        });
+                      }}
+                      className="w-full px-4 py-3 rounded-xl bg-gray-50 border-0 focus:ring-2 focus:ring-orange-500 transition-all"
+                    />
+                  </div>
+                  <div className="relative w-24">
+                    <input
+                      type="text"
+                      list="units"
+                      placeholder="單位"
+                      value={ingredient.unit}
+                      onChange={(e) => {
+                        const newIngredients = [...formData.ingredients];
+                        newIngredients[index].unit = e.target.value;
+                        setFormData({
+                          ...formData,
+                          ingredients: newIngredients,
+                        });
+                      }}
+                      className="w-full px-4 py-3 rounded-xl bg-gray-50 border-0 focus:ring-2 focus:ring-orange-500 transition-all"
+                    />
+                    <datalist id="units">
+                      {COMMON_UNITS.map((unit) => (
+                        <option key={unit} value={unit} />
+                      ))}
+                    </datalist>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
             <button
               type="button"
               onClick={() =>
@@ -239,7 +283,7 @@ export default function NewRecipePage() {
                   ],
                 })
               }
-              className="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium"
+              className="mt-4 flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium"
             >
               <FontAwesomeIcon icon={faPlus} />
               新增食材
