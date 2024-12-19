@@ -5,7 +5,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
-
+import Layout from "./components/Layout";
 // 防止 Font Awesome 圖標閃爍
 config.autoAddCss = false;
 
@@ -35,9 +35,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="zh-TW" suppressHydrationWarning>
       <head>
@@ -50,7 +50,9 @@ export default function RootLayout({
         className={`${notoSansTC.variable} ${playfair.variable} ${geistMono.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <Layout>{children}</Layout>
+        </AuthProvider>
         <Toaster position="top-center" />
       </body>
     </html>
